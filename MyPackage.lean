@@ -2,19 +2,6 @@ import Lean
 open Lean Widget
 
 @[widget]
-def helloWidget : UserWidgetDefinition where
-  name := "Hello"
-  javascript := "
-    import * as React from 'react';
-    export default function(props) {
-      const name = props.name || 'world'
-      return React.createElement('p', {}, name + '!')
-    }"
-
-#widget helloWidget (Json.mkObj [("name", "Joachim")])
-
-
-@[widget]
 def insertTextWidget : UserWidgetDefinition where
   name := "textInserter"
   javascript := include_str "widget" / "dist" / "widget.js"
