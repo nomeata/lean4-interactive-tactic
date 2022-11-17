@@ -17,8 +17,8 @@ export default function(props : {range : Range}) {
     console.log("Clicking")
     //editorConnection.api.insertText('hello', 'here', position_params);
     const te : TextEdit = { range: props.range, newText : "hello" }
-    var changes = {}
-    changes[uri] = te
+    var changes : { [_: DocumentUri]: TextEdit[] } = {}
+    changes[uri] = [ te ]
     const we : WorkspaceEdit = { changes }
     console.log(we)
     // editorConnection.api.insertText('hello', 'here', position_params);
