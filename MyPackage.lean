@@ -138,3 +138,5 @@ instance : Interactive Color := {
   component := include_str "color" / "dist" / "widget.js",
   fromInteractiveString := λ hex => { hex }
 }
+
+def a_color : Color := by interactive "#5e4090"
