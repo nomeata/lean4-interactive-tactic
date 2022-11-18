@@ -71,7 +71,6 @@ elab "interactive" slit:str : tactic => do
     range := String.Range.toLspRange fm r
   }
 
-
   /- We get the JS code of the widget from the Interactive instance as well -/
   let js_code_e <- whnf (<- mkAppOptM `Interactive.component #[some t, none])
   let js_code <- match js_code_e with
@@ -113,15 +112,16 @@ instance : Interactive Int := {
       import * as React from 'react';
       const e = React.createElement;
       export default function(props) {
+        const val = parseInt(props.data)
         return e('div', null,
-          'Current value: ', props.data,
+          'Current value: ', val,
           e('button', {
             onClick : (event) =>
-                props.onDataChange((parseInt(props.data) + 1).toString())
+                props.onDataChange((val + 1).toString())
           }, '+'),
           e('button', {
             onClick : (event) =>
-               props.onDataChange((parseInt(props.data) - 1).toString())
+               props.onDataChange((val - 1).toString())
            }, '-')
         )
       }",
@@ -129,5 +129,5 @@ instance : Interactive Int := {
   }
 
 
-def an_int  : Int :=
-  by interactive "-4"
+def an_int : Int :=
+  by interactive "9"
