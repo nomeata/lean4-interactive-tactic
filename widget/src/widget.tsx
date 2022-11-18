@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { RpcContext, EditorContext } from '@leanprover/infoview';
+import debounce from 'lodash.debounce';
 
+import { RpcContext, EditorContext } from '@leanprover/infoview';
 interface Params  {
   loc : any
   data : string
@@ -16,6 +17,7 @@ var module_cache : { [hash:string] : InnerComponent; } = {}
 export default function(props : Params) {
   const editorConnection = React.useContext(EditorContext)
   const rs = React.useContext(RpcContext)
+  const [localData, setLocalData] = React.useState(props.data)
 
   if (! module_cache.hasOwnProperty(props.codeHash)) {
     console.log("Loading source")
@@ -26,10 +28,14 @@ export default function(props : Params) {
     module_cache[props.codeHash] = React.lazy(() => import(url))
   }
 
-  return React.createElement(module_cache[props.codeHash], {
-    data: props.data,
-    onDataChange: (newData : string) => {
-      rs.call('updateInteractiveData', { newData, loc : props.loc})
-    }
-  })
+  const reportChange = (newData : string, loc : any) =>
+      rs.call('updateInteractiveData', { newData, loc });
+  const debouncedChangeHandler = React.useMemo(() => debounce(reportChange, 300), [])
+  const handler = (newData : string) => {
+    setLocalData(newData)
+    debouncedChangeHandler(newData, props.loc)
+  }
+
+  return React.createElement(module_cache[props.codeHash],
+    { data: localData, onDataChange: handler })
 }
