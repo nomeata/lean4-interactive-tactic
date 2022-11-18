@@ -4,9 +4,9 @@ open Lean Widget
 /-- The public interface: -/
 class Interactive (a : Type) where
   /--
-  JS source of a React module/component. Its props argument will contain
-   * data : string : A String representing the current state
-   * onDataChange : string -> (): A callback called when the state changes
+  JS source of a React module/component:
+  type InnerComponent =
+    React.ComponentType<{data : string, onDataChange : (new_data  : string) => void }>
   -/
   component : String
   /--
@@ -106,7 +106,7 @@ instance : Interactive String := {
 
 
 def a_string : String :=
-  by interactive "Hello, Lean :-)!"
+  by interactive "Heskllo, Lean "
 
 instance : Interactive Int := {
   component := "
@@ -130,4 +130,4 @@ instance : Interactive Int := {
 
 
 def an_int  : Int :=
-  by interactive "-3"
+  by interactive "-6"
