@@ -131,3 +131,10 @@ instance : Interactive Int := {
 
 def an_int : Int :=
   by interactive "9"
+
+structure Color where hex : String
+
+instance : Interactive Color := {
+  component := include_str "color" / "dist" / "widget.js",
+  fromInteractiveString := λ hex => { hex }
+}
