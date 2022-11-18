@@ -10,7 +10,7 @@ interface Params  {
   codeHash : string
 }
 
-export default async function(props : Params) {
+export default function(props : Params) {
   const editorConnection = React.useContext(EditorContext)
   const rs = React.useContext(RpcContext)
 
@@ -19,16 +19,13 @@ export default async function(props : Params) {
       `widget_${props.codeHash}.js`, { type: 'text/javascript' })
   const url = URL.createObjectURL(file)
   console.log("Importing", file, url)
-  const module = await import(url)
-  const fun = module.default
-  console.log("Imported", fun)
-
+  const component = React.lazy(() => import(url))
   function onClick() {
     rs.call('replaceText', { newText : "hello", range: props.range , uri : props.uri})
   }
   return e('div', null, [
     e('button', { onClick }, 'Insert'),
     // React.createElement(component.default, {}),
-    fun({}),
+    e(component,{}),
     "Foo"])
 }

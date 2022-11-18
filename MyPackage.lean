@@ -41,6 +41,7 @@ open Elab Command in
       | some r => pure r
       | none => throwUnsupportedSyntax
     let fm <- getFileMap
+    /- FileWorker.EditableDocument  would be better, has version etc. -/
     let fn <- getFileName
     let lp := String.Range.toLspRange fm r
     saveWidgetInfo `insertTextWidget (Json.mkObj
