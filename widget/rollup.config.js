@@ -6,7 +6,7 @@ import replace from '@rollup/plugin-replace'
 export default cliArgs => {
     return {
     input: [
-        `src/widget.ts`
+        `src/widget.tsx`
     ],
     output: {
         dir: "dist",

@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "scripts": {
       "watch": "rollup --environment NODE_ENV:production --config --watch",
-      "build": "rollup --environment NODE_ENV:production --config"
+      "build": "rollup --environment NODE_ENV:production --config",
+      "watch-dev": "rollup --environment NODE_ENV:dev --config --watch"
     },
     "license": "Apache-2.0",
     "dependencies": {
