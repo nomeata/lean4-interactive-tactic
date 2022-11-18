@@ -88,4 +88,29 @@ instance : Interactive String := {
   }
 
 
-def foo  : String := by interactive "Helosdfdh"
+def a_string : String :=
+  by interactive "Hello, Lean :-)!"
+
+instance : Interactive Int := {
+  component := "
+      import * as React from 'react';
+      const e = React.createElement;
+      export default function(props) {
+        return e('div', null,
+          'Current value: ', props.data,
+          e('button', {
+            onClick : (event) =>
+                props.onDataChange((parseInt(props.data) + 1).toString())
+          }, '+'),
+          e('button', {
+            onClick : (event) =>
+               props.onDataChange((parseInt(props.data) - 1).toString())
+           }, '-')
+        )
+      }",
+  fromInteractiveString := λ s => s.toInt?.getD 0
+  }
+
+
+def an_int  : Int :=
+  by interactive "-3"
