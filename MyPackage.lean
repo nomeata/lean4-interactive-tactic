@@ -1,9 +1,18 @@
 import Lean
 open Lean Widget
 
+/-- The public interface: -/
 class Interactive (a : Type) where
+  /--
+  JS source of a React module/component. Its props argument will contain
+   * data : string : A String representing the current state
+   * onDataChange : string -> (): A callback called when the state changes
+  -/
   component : String
-  /- TODO: How to signal error? -/
+  /--
+  A lean function converting a string representation to a lean value.
+  TODO: How should errors be reported here?
+  -/
   fromInteractiveString : String -> a
 
 @[widget]
@@ -11,10 +20,15 @@ def insertTextWidget : UserWidgetDefinition where
   name := "textInserter"
   javascript := include_str "widget" / "dist" / "widget.js"
 
-structure UpdateInteractiveDataParams where
-  newData : String
+/- Should be opaque to the JS side -/
+structure InteractiveDataLocation where
   range : Lsp.Range
   uri : String
+  deriving FromJson, ToJson /- TODO: use RPC references -/
+
+structure UpdateInteractiveDataParams where
+  newData : String
+  loc : InteractiveDataLocation
   deriving FromJson, ToJson
 
 open Server RequestM in
@@ -23,9 +37,9 @@ def updateInteractiveData (params : UpdateInteractiveDataParams) : RequestM (Req
   asTask do
     Lean.Server.applyWorkspaceEdit ({
         label? := none,
-        edit := .ofTextEdit params.uri { 
+        edit := .ofTextEdit params.loc.uri { 
           newText := reprStr params.newData,
-          range := params.range
+          range := params.loc.range
         }
       }) (<- read).hOut
     return 42 /- Unit is not RPC encodable -/
@@ -41,7 +55,8 @@ elab "interactive" slit:str : tactic => do
   let data := slit.getString
 
   /- We solve the goal using the string and fromInteractiveString -/
-  let res <- mkAppOptM `Interactive.fromInteractiveString #[some t, none, some (.lit (Literal.strVal data))]
+  let res <- mkAppOptM `Interactive.fromInteractiveString
+              #[some t, none, some (.lit (Literal.strVal data))]
   Tactic.closeMainGoal res
 
   /- Figure out the range of the strlit in LSP compatible form -/
@@ -51,7 +66,10 @@ elab "interactive" slit:str : tactic => do
   let fm <- getFileMap
   /- FileWorker.EditableDocument  would be better, has version etc. -/
   let fn <- getFileName
-  let lp := String.Range.toLspRange fm r
+  let loc : InteractiveDataLocation := {
+    uri := "file://" ++ fn,
+    range := String.Range.toLspRange fm r
+  }
 
 
   /- We get the JS code of the widget from the Interactive instance as well -/
@@ -62,8 +80,7 @@ elab "interactive" slit:str : tactic => do
 
   /- Now register the widget -/
   saveWidgetInfo `insertTextWidget (Json.mkObj
-    [ ("range", toJson lp),
-      ("uri", toJson ("file://" ++ fn)),
+    [ ("loc", toJson loc),
       ("code", toJson js_code),
       ("codeHash", toJson (hash js_code)),
       ("data", toJson data)

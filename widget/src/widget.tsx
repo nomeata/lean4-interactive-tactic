@@ -1,10 +1,8 @@
 import * as React from 'react';
-import { RpcContext, InteractiveCode, EditorContext } from '@leanprover/infoview';
-import type { DocumentUri, Position, Range, TextDocumentPositionParams, TextEdit, WorkspaceEdit } from 'vscode-languageserver-protocol';
+import { RpcContext, EditorContext } from '@leanprover/infoview';
 
 interface Params  {
-  range : Range
-  uri : string
+  loc : any
   data : string
   code : string
   codeHash : string
@@ -23,7 +21,7 @@ export default function(props : Params) {
   const subprops = {
       data: props.data,
       onDataChange: (newData : string) => {
-        rs.call('updateInteractiveData', { newData, range: props.range, uri : props.uri})
+        rs.call('updateInteractiveData', { newData, loc : props.loc})
       }
   }
   return React.createElement(component,subprops)
