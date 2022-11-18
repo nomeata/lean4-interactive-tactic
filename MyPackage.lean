@@ -54,9 +54,12 @@ elab "interactive" slit:str : tactic => do
   /- The currently serialized data -/
   let data := slit.getString
 
-  /- We solve the goal using the string and fromInteractiveString -/
-  let res <- mkAppOptM `Interactive.fromInteractiveString
-              #[some t, none, some (.lit (Literal.strVal data))]
+  /- We solve the goal using the string and fromInteractiveString
+     We use whnf to make sure the term does not depend on the instance, to not
+     pull in the widget code.  -/
+  let res := Expr.app
+      (← whnf (← mkAppOptM `Interactive.fromInteractiveString #[some t, none]))
+      (.lit (Literal.strVal data))
   Tactic.closeMainGoal res
 
   /- Figure out the range of the strlit in LSP compatible form -/
@@ -103,9 +106,8 @@ instance : Interactive String := {
   fromInteractiveString := id
   }
 
-
 def a_string : String :=
-  by interactive "Heskllo, Lean "
+  by interactive "Hello, Lean "
 
 instance : Interactive Int := {
   component := "
@@ -139,4 +141,4 @@ instance : Interactive Color := {
   fromInteractiveString := λ hex => { hex }
 }
 
-def a_color : Color := by interactive "#5e4090"
+def a_color : Color := by interactive "#3b2d2d"
