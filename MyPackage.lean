@@ -130,4 +130,4 @@ instance : Interactive Int := {
 
 
 def an_int  : Int :=
-  by interactive "-6"
+  by interactive "-4"

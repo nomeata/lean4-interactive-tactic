@@ -17,24 +17,19 @@ export default function(props : Params) {
   const editorConnection = React.useContext(EditorContext)
   const rs = React.useContext(RpcContext)
 
-  var component
-  if (module_cache.hasOwnProperty(props.codeHash)) {
-    component = module_cache[props.codeHash]
-  } else {
+  if (! module_cache.hasOwnProperty(props.codeHash)) {
     console.log("Loading source")
     const file = new File([props.code],
         `widget_${props.codeHash}.js`, { type: 'text/javascript' })
     const url = URL.createObjectURL(file)
     console.log("Importing", file, url)
-    component = React.lazy(() => import(url))
-    module_cache[props.codeHash] = component
+    module_cache[props.codeHash] = React.lazy(() => import(url))
   }
 
-  const subprops = {
-      data: props.data,
-      onDataChange: (newData : string) => {
-        rs.call('updateInteractiveData', { newData, loc : props.loc})
-      }
-  }
-  return React.createElement(component,subprops)
+  return React.createElement(module_cache[props.codeHash], {
+    data: props.data,
+    onDataChange: (newData : string) => {
+      rs.call('updateInteractiveData', { newData, loc : props.loc})
+    }
+  })
 }
