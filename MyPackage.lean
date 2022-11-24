@@ -44,6 +44,13 @@ def updateInteractiveData (params : UpdateInteractiveDataParams) : RequestM (Req
       }) (<- read).hOut
     return 42 /- Unit is not RPC encodable -/
 
+open Lean Lean.Meta Lean.Elab Lean.Elab.Term in
+private unsafe def evalStringUnsafe (e : Expr) : MetaM String :=
+  Lean.Meta.evalExpr String (mkConst ``String) e
+
+@[implemented_by evalStringUnsafe]
+private opaque evalString (e : Expr) : MetaM String
+
 
 open Lean Lean.Meta Lean.Elab Lean.Elab.Term in
 open Elab Command in
@@ -75,10 +82,7 @@ elab "interactive" slit:str : tactic => do
   }
 
   /- We get the JS code of the widget from the Interactive instance as well -/
-  let js_code_e <- whnf (<- mkAppOptM `Interactive.component #[some t, none])
-  let js_code <- match js_code_e with
-   | Expr.lit (Literal.strVal js_code) => pure js_code
-   | _ => throwUnsupportedSyntax
+  let js_code <- evalString (← mkAppOptM `Interactive.component #[some t, none])
 
   /- Now register the widget -/
   saveWidgetInfo `insertTextWidget (Json.mkObj
